@@ -3,6 +3,7 @@ module github.2rioffice.com/platform/terraform-provider-mongodb-driver
 go 1.19
 
 require (
+	github.com/hashicorp-demoapp/hashicups-client-go v0.1.0
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-framework v1.3.3
 	github.com/hashicorp/terraform-plugin-go v0.18.0
