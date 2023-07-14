@@ -1,4 +1,4 @@
-module github.com/hashicorp/terraform-provider-scaffolding-framework
+module github.2rioffice.com/platform/terraform-provider-mongodb-driver
 
 go 1.19
 
