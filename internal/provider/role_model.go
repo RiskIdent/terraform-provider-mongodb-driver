@@ -2,17 +2,17 @@ package provider
 
 import (
 	"github.2rioffice.com/platform/terraform-provider-mongodb-driver/internal/mongodb"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var RoleModelSchema = schema.NestedAttributeObject{
-	Attributes: map[string]schema.Attribute{
-		"role": schema.StringAttribute{
+var RoleModelSchema = dataschema.NestedAttributeObject{
+	Attributes: map[string]dataschema.Attribute{
+		"role": dataschema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Role name",
 		},
-		"db": schema.StringAttribute{
+		"db": dataschema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Database this role belongs to.",
 		},

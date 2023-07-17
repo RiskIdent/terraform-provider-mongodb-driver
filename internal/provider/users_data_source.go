@@ -11,14 +11,14 @@ import (
 )
 
 func NewUsersDataSource() datasource.DataSource {
-	return &usersDataSource{}
+	return &UsersDataSource{}
 }
 
-type usersDataSource struct {
+type UsersDataSource struct {
 	client *mongodb.Client
 }
 
-type usersDataSourceModel struct {
+type UsersDataSourceModel struct {
 	DB    types.String `tfsdk:"db"`
 	Users []UserModel  `tfsdk:"users"`
 
@@ -30,15 +30,15 @@ type usersDataSourceModel struct {
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ datasource.DataSource              = &usersDataSource{}
-	_ datasource.DataSourceWithConfigure = &usersDataSource{}
+	_ datasource.DataSource              = &UsersDataSource{}
+	_ datasource.DataSourceWithConfigure = &UsersDataSource{}
 )
 
-func (d *usersDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *UsersDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_users"
 }
 
-func (d *usersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *UsersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `MongoDB user listing data source`,
 
@@ -50,7 +50,7 @@ func (d *usersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 			"users": schema.ListNestedAttribute{
 				MarkdownDescription: "List of users fetched from MongoDB",
 				Computed:            true,
-				NestedObject:        UserModelSchema,
+				NestedObject:        UserModelDataSourceSchema,
 			},
 			"filter": schema.MapAttribute{
 				Optional:            true,
@@ -62,7 +62,7 @@ func (d *usersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *usersDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *UsersDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -88,8 +88,8 @@ func (d *usersDataSource) Configure(ctx context.Context, req datasource.Configur
 	d.client = client
 }
 
-func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state usersDataSourceModel
+func (d *UsersDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var state UsersDataSourceModel
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {

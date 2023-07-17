@@ -2,35 +2,35 @@ package provider
 
 import (
 	"github.2rioffice.com/platform/terraform-provider-mongodb-driver/internal/mongodb"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	dataschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var UserModelSchema = schema.NestedAttributeObject{
-	Attributes: map[string]schema.Attribute{
-		"id": schema.StringAttribute{
+var UserModelDataSourceSchema = dataschema.NestedAttributeObject{
+	Attributes: map[string]dataschema.Attribute{
+		"id": dataschema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "User unique ID in MongoDB. Is composed from the `db` and `user` fields.",
 		},
-		"user": schema.StringAttribute{
+		"user": dataschema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Username for this MongoDB user.",
 		},
-		"db": schema.StringAttribute{
+		"db": dataschema.StringAttribute{
 			Computed:            true,
 			MarkdownDescription: "Database this MongoDB user belongs to.",
 		},
-		"custom_data": schema.MapAttribute{
+		"custom_data": dataschema.MapAttribute{
 			Computed:            true,
 			ElementType:         types.StringType,
 			MarkdownDescription: "Any custom data for this user. Map of string key and values of arbitrary values.",
 		},
-		"roles": schema.ListNestedAttribute{
+		"roles": dataschema.ListNestedAttribute{
 			Computed:            true,
 			NestedObject:        RoleModelSchema,
 			MarkdownDescription: "Roles this user belongs to.",
 		},
-		"mechanisms": schema.ListAttribute{
+		"mechanisms": dataschema.ListAttribute{
 			Computed:            true,
 			ElementType:         types.StringType,
 			MarkdownDescription: "Authentication mechanisms this user can use.",
