@@ -19,13 +19,61 @@ type UsersDataSource struct {
 }
 
 type UsersDataSourceModel struct {
-	DB    types.String `tfsdk:"db"`
-	Users []UserModel  `tfsdk:"users"`
+	DB    types.String          `tfsdk:"db"`
+	Users []UserDataSourceModel `tfsdk:"users"`
 
 	// MongoDB support more dynamic filters, but due to Terraform Plugin Framework
 	// not supporting dynamic types, we have to settle on a simple map.
 	// See: https://github.com/hashicorp/terraform-plugin-framework/issues/147
 	Filter map[string]string `tfsdk:"filter"`
+}
+
+type UserDataSourceModel struct {
+	ID         types.String              `tfsdk:"id"`
+	User       types.String              `tfsdk:"user"`
+	DB         types.String              `tfsdk:"db"`
+	CustomData map[string]types.String   `tfsdk:"custom_data"`
+	Roles      []UserRoleDataSourceModel `tfsdk:"roles"`
+	Mechanisms []types.String            `tfsdk:"mechanisms"`
+}
+
+func toTypesUserDataSourceSlice(users []mongodb.User) []UserDataSourceModel {
+	result := make([]UserDataSourceModel, len(users))
+	for i, user := range users {
+		result[i] = toTypesUserDataSource(user)
+	}
+	return result
+}
+
+func toTypesUserDataSource(user mongodb.User) UserDataSourceModel {
+	return UserDataSourceModel{
+		ID:         types.StringValue(user.ID),
+		User:       types.StringValue(user.User),
+		DB:         types.StringValue(user.DB),
+		CustomData: toTypesStringMap(user.CustomData),
+		Roles:      toTypesUserRoleDataSourceSlice(user.Roles),
+		Mechanisms: toTypesStringSlice(user.Mechanisms),
+	}
+}
+
+type UserRoleDataSourceModel struct {
+	Role types.String `tfsdk:"role"`
+	DB   types.String `tfsdk:"db"`
+}
+
+func toTypesUserRoleDataSourceSlice(slice []mongodb.RoleDBRef) []UserRoleDataSourceModel {
+	result := make([]UserRoleDataSourceModel, len(slice))
+	for i, role := range slice {
+		result[i] = toTypesUserRoleDataSource(role)
+	}
+	return result
+}
+
+func toTypesUserRoleDataSource(role mongodb.RoleDBRef) UserRoleDataSourceModel {
+	return UserRoleDataSourceModel{
+		Role: types.StringValue(role.Role),
+		DB:   types.StringValue(role.DB),
+	}
 }
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -50,7 +98,48 @@ func (d *UsersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 			"users": schema.ListNestedAttribute{
 				MarkdownDescription: "List of users fetched from MongoDB",
 				Computed:            true,
-				NestedObject:        UserModelDataSourceSchema,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"id": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "User unique ID in MongoDB. Is composed from the `db` and `user` fields.",
+						},
+						"user": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Username for this MongoDB user.",
+						},
+						"db": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Database this MongoDB user belongs to.",
+						},
+						"custom_data": schema.MapAttribute{
+							Computed:            true,
+							ElementType:         types.StringType,
+							MarkdownDescription: "Any custom data for this user. Map of string key and values of arbitrary values.",
+						},
+						"roles": schema.ListNestedAttribute{
+							Computed: true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"role": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "Role name",
+									},
+									"db": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "Database this role belongs to.",
+									},
+								},
+							},
+							MarkdownDescription: "Roles this user belongs to.",
+						},
+						"mechanisms": schema.ListAttribute{
+							Computed:            true,
+							ElementType:         types.StringType,
+							MarkdownDescription: "Authentication mechanisms this user can use.",
+						},
+					},
+				},
 			},
 			"filter": schema.MapAttribute{
 				Optional:            true,
@@ -115,7 +204,7 @@ func (d *UsersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		)
 	}
 
-	state.Users = ConvertUserSlice(users)
+	state.Users = toTypesUserDataSourceSlice(users)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
