@@ -262,14 +262,6 @@ func (r *UserResource) Configure(ctx context.Context, req resource.ConfigureRequ
 		return
 	}
 
-	if err := client.Connect(ctx); err != nil {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Failed to connect to MongoDB. Error: %s", err),
-		)
-		return
-	}
-
 	r.client = client
 }
 

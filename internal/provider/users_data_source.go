@@ -179,14 +179,6 @@ func (d *UsersDataSource) Configure(ctx context.Context, req datasource.Configur
 		return
 	}
 
-	if err := client.Connect(ctx); err != nil {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Failed to connect to MongoDB. Error: %s", err),
-		)
-		return
-	}
-
 	d.client = client
 }
 

@@ -167,23 +167,11 @@ func (p *mongodbProvider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
-	// Create a new HashiCups client using the configuration values
-	client, err := mongodb.New(uri, mongodb.Credentials{
+	client := mongodb.New(uri, mongodb.Credentials{
 		Username: username,
 		Password: password,
 	})
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Create MongoDB Client",
-			"An unexpected error occurred when creating the MongoDB client. "+
-				"If the error is not clear, please contact the provider developers.\n\n"+
-				"MongoDB Client Error: "+err.Error(),
-		)
-		return
-	}
 
-	// Make the HashiCups client available during DataSource and Resource
-	// type Configure methods.
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

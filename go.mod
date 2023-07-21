@@ -12,6 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	go.mongodb.org/mongo-driver v1.12.0
+	gopkg.in/typ.v4 v4.3.0
 )
 
 require (
