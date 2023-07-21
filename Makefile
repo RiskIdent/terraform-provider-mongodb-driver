@@ -45,7 +45,7 @@ lint-license:
 lint-go:
 	@echo goimports -d '**/*.go'
 	@goimports -d $(shell git ls-files "*.go")
-	revive -formatter stylish -config revive.toml ./...
+	staticcheck -f stylish ./...
 
 .PHONY: lint-go-fix
 lint-go-fix:
