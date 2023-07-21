@@ -1,0 +1,15 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: terraform-provider-mongodb-driver
+Upstream-Contact: Risk.Ident GmbH <contact@riskident.com>
+Source: https://github.com/RiskIdent/terraform-provider-mongodb-driver
+
+# Sample paragraph, commented out:
+#
+# Files: src/*
+# Copyright: $YEAR $NAME <$CONTACT>
+# License: ...
+
+# Generated documentation
+Files: docs/*.md
+Copyright: 2023 Risk.Ident GmbH <contact@riskident.com>
+License: CC-BY-4.0

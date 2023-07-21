@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Risk.Ident GmbH <contact@riskident.com>
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package mongodb
 
 import (
@@ -31,6 +35,7 @@ type Credentials struct {
 	Password string
 }
 
+// TODO: Use mongo.Connect instead
 func New(uri string, cred Credentials) (*Client, error) {
 	opt := options.Client().ApplyURI(uri).SetDirect(true)
 	opt.AppName = &AppName

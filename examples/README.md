@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 Risk.Ident GmbH <contact@riskident.com>
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Examples
 
 This directory contains examples that are mostly used for documentation, but can also be run/tested manually via the Terraform CLI.

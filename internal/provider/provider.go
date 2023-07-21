@@ -1,4 +1,6 @@
-// Copyright (c) HashiCorp, Inc.
+// SPDX-FileCopyrightText: 2021 HashiCorp, Inc.
+// SPDX-FileCopyrightText: 2023 Risk.Ident GmbH <contact@riskident.com>
+//
 // SPDX-License-Identifier: MPL-2.0
 
 package provider

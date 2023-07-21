@@ -1,4 +1,3 @@
-
 // Search all users in all databases
 data "mongodb_users" "example" {
 }

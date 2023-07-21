@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Risk.Ident GmbH <contact@riskident.com>
+//
+// SPDX-License-Identifier: CC0-1.0
+
 module github.2rioffice.com/platform/terraform-provider-mongodb-driver
 
 go 1.20
