@@ -162,14 +162,15 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"db": schema.StringAttribute{
 				Required: true,
 				MarkdownDescription: "Database this MongoDB user belongs to.\n\n" +
-					"MongoDB has some restrictions on database names. Such as:\n\n" +
-					"- Cannot contain any of the following characters (we're following Windows limits): `/\\. \"$*<>:|?`\n" +
-					"- Cannot create users in the `local` database.\n" +
-					"- Cannot be empty.\n" +
-					"- Cannot be longer than 64 characters.\n\n" +
-					"See documentation:\n\n" +
-					"- <https://www.mongodb.com/docs/manual/reference/command/createUser/#local-database>\n" +
-					"- <https://www.mongodb.com/docs/v6.0/reference/limits/#naming-restrictions>",
+					// Indenting here because the documentation generation doesn't do it
+					"  MongoDB has some restrictions on database names. Such as:\n\n" +
+					"  - Cannot contain any of the following characters (we're following Windows limits): `/\\. \"$*<>:|?`\n" +
+					"  - Cannot create users in the `local` database.\n" +
+					"  - Cannot be empty.\n" +
+					"  - Cannot be longer than 64 characters.\n\n" +
+					"  See documentation:\n\n" +
+					"  - <https://www.mongodb.com/docs/manual/reference/command/createUser/#local-database>\n" +
+					"  - <https://www.mongodb.com/docs/v6.0/reference/limits/#naming-restrictions>",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

@@ -93,13 +93,14 @@ func (d *UsersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 		Attributes: map[string]schema.Attribute{
 			"db": schema.StringAttribute{
 				Optional: true,
-				MarkdownDescription: "Which database to list users from. If `null`, then will list users in all databases." +
-					"MongoDB has some restrictions on database names. Such as:\n\n" +
-					"- Cannot contain any of the following characters (we're following Windows limits): `/\\. \"$*<>:|?`\n" +
-					"- Cannot be empty.\n" +
-					"- Cannot be longer than 64 characters.\n\n" +
-					"See documentation:\n\n" +
-					"- <https://www.mongodb.com/docs/v6.0/reference/limits/#naming-restrictions>",
+				MarkdownDescription: "Which database to list users from. If `null`, then will list users in all databases.\n\n" +
+					// Indenting here because the documentation generation doesn't do it
+					"  MongoDB has some restrictions on database names. Such as:\n\n" +
+					"  - Cannot contain any of the following characters (we're following Windows limits): `/\\. \"$*<>:|?`\n" +
+					"  - Cannot be empty.\n" +
+					"  - Cannot be longer than 64 characters.\n\n" +
+					"  See documentation:\n\n" +
+					"  - <https://www.mongodb.com/docs/v6.0/reference/limits/#naming-restrictions>",
 				Validators: databaseValidators,
 			},
 			"users": schema.ListNestedAttribute{

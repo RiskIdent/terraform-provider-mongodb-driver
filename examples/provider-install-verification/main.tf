@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "mongodb" {
-  host = "http://localhost:19090"
+  host     = "http://localhost:19090"
   username = "education"
   password = "test123"
 }
