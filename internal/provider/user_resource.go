@@ -213,9 +213,12 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				},
 			},
 			"mechanisms": schema.ListAttribute{
-				Optional:            true,
-				MarkdownDescription: "Authentication mechanisms this user can use.",
-				ElementType:         types.StringType,
+				Optional: true,
+				MarkdownDescription: "Authentication mechanisms this user can use.\n\n" +
+					// Indenting here because the documentation generation doesn't do it
+					"  - The default for featureCompatibilityVersion `4.0` is both `SCRAM-SHA-1` and `SCRAM-SHA-256`.\n" +
+					"  - The default for featureCompatibilityVersion `3.6` is `SCRAM-SHA-1`.",
+				ElementType: types.StringType,
 				Validators: []validator.List{
 					listvalidator.UniqueValues(),
 					listvalidator.ValueStringsAre(
