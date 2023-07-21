@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,7 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"gopkg.in/typ.v4/sync2"
 )
 
 var (
@@ -28,7 +28,7 @@ var (
 type Client struct {
 	uri         string
 	credentials Credentials
-	connectOnce sync2.Once2[*mongo.Client, error]
+	connectOnce sync.Once
 }
 
 type Credentials struct {
@@ -43,8 +43,8 @@ func New(uri string, cred Credentials) *Client {
 	}
 }
 
-func (c *Client) connect(ctx context.Context) (*mongo.Client, error) {
-	return c.connectOnce.Do(func() (*mongo.Client, error) {
+func (c *Client) connect(ctx context.Context) (client *mongo.Client, connectErr error) {
+	c.connectOnce.Do(func() {
 		ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
 		defer cancel()
 		opt := options.Client().ApplyURI(c.uri).SetDirect(true)
@@ -57,15 +57,16 @@ func (c *Client) connect(ctx context.Context) (*mongo.Client, error) {
 			})
 		}
 
-		client, err := mongo.Connect(ctx, opt)
-		if err != nil {
-			return nil, fmt.Errorf("connect: %w", err)
+		client, connectErr = mongo.Connect(ctx, opt)
+		if connectErr != nil {
+			connectErr = fmt.Errorf("connect: %w", connectErr)
+			return
 		}
 		if err := client.Ping(ctx, readpref.PrimaryPreferred()); err != nil {
-			return nil, fmt.Errorf("ping: %w", err)
+			connectErr = fmt.Errorf("ping: %w", err)
 		}
-		return client, nil
 	})
+	return
 }
 
 type CommandResponse struct {
