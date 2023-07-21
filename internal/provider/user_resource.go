@@ -7,14 +7,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.2rioffice.com/platform/terraform-provider-mongodb-driver/internal/mongodb"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -148,47 +152,92 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					// MongoDB restricts username on "at least one character and
+					// cannot be larger than 7MB". Lol!
+					// https://www.mongodb.com/docs/v6.0/reference/command/createUser/#username-limits
+					stringvalidator.LengthBetween(1, 7*1000*1000),
+				},
 			},
 			"db": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Database this MongoDB user belongs to.",
+				Required: true,
+				MarkdownDescription: "Database this MongoDB user belongs to.\n\n" +
+					"MongoDB has some restrictions on database names. Such as:\n\n" +
+					"- Cannot contain any of the following characters (we're following Windows limits): `/\\. \"$*<>:|?`\n" +
+					"- Cannot create users in the `local` database.\n" +
+					"- Cannot be empty.\n" +
+					"- Cannot be longer than 64 characters.\n\n" +
+					"See documentation:\n\n" +
+					"- <https://www.mongodb.com/docs/manual/reference/command/createUser/#local-database>\n" +
+					"- <https://www.mongodb.com/docs/v6.0/reference/limits/#naming-restrictions>",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: append(
+					databaseValidators,
+					stringvalidator.NoneOf("local"),
+				),
 			},
 			"pwd": schema.StringAttribute{
 				Required:            true,
 				Sensitive:           true,
 				MarkdownDescription: "Password of this user.",
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"custom_data": schema.MapAttribute{
 				Optional:            true,
-				ElementType:         types.StringType,
 				MarkdownDescription: "Any custom data for this user. Map of string key and values of arbitrary values.",
+				ElementType:         types.StringType,
 			},
 			"roles": schema.ListNestedAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Roles this user belongs to.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"role": schema.StringAttribute{
 							Required:            true,
 							MarkdownDescription: "Role name",
+							Validators: []validator.String{
+								stringvalidator.LengthAtLeast(1),
+							},
 						},
 						"db": schema.StringAttribute{
 							Optional:            true,
 							MarkdownDescription: "Database this role belongs to. Leave unset to target same database as user.",
+							Validators:          databaseValidators,
 						},
 					},
 				},
-				MarkdownDescription: "Roles this user belongs to.",
 			},
 			"mechanisms": schema.ListAttribute{
 				Optional:            true,
-				ElementType:         types.StringType,
 				MarkdownDescription: "Authentication mechanisms this user can use.",
+				ElementType:         types.StringType,
+				Validators: []validator.List{
+					listvalidator.UniqueValues(),
+					listvalidator.ValueStringsAre(
+						stringvalidator.OneOf(castToStringSlice(mongodb.Mechanisms)...),
+					),
+				},
 			},
 		},
 	}
+}
+
+var databaseValidators = []validator.String{
+	stringvalidator.LengthBetween(1, 64),
+	stringvalidator.RegexMatches(regexp.MustCompile(`^[^\/\\. "$*<>:|?\0]*$`),
+		`MongoDB has restrictions on database name. We're limiting on the Windows restrictions here to be safe. See https://www.mongodb.com/docs/v6.0/reference/limits/#naming-restrictions`),
+}
+
+func castToStringSlice[E ~string](slice []E) []string {
+	result := make([]string, len(slice))
+	for i, s := range slice {
+		result[i] = string(s)
+	}
+	return result
 }
 
 func (r *UserResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

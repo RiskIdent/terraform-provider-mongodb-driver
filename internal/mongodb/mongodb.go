@@ -17,6 +17,8 @@ import (
 var (
 	ErrNotFound = errors.New("not found")
 	ErrNotOK    = errors.New("not ok")
+
+	AppName = "terraform-provider-mongodb-driver"
 )
 
 type Client struct {
@@ -31,6 +33,7 @@ type Credentials struct {
 
 func New(uri string, cred Credentials) (*Client, error) {
 	opt := options.Client().ApplyURI(uri).SetDirect(true)
+	opt.AppName = &AppName
 	if cred.Username != "" {
 		opt.SetAuth(options.Credential{
 			Username:    cred.Username,
@@ -90,6 +93,14 @@ func (RoleSameDBRef) isRoleRef() {}
 //
 // [https://www.mongodb.com/docs/manual/reference/parameters/#mongodb-parameter-param.authenticationMechanisms]
 type Mechanism string
+
+var Mechanisms = []Mechanism{
+	MechanismSCRAMSHA1,
+	MechanismSCRAMSHA256,
+	MechanismMONGODBX509,
+	MechanismPLAIN,
+	MechanismGSSAPI,
+}
 
 const (
 	// MechanismSCRAMSHA1 is the SCRAM mechanism for creating SCRAM user credentials.
