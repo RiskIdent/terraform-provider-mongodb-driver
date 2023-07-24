@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    mongodb = {
+      source  = "RiskIdent/mongodb-driver"
+      version = "~> 0.1"
+    }
+  }
+}
+
 provider "mongodb" {
   uri = "mongodb://localhost:27017"
 }
