@@ -9,7 +9,7 @@ import (
 	"context"
 	"os"
 
-	"github.2rioffice.com/platform/terraform-provider-mongodb-driver/internal/mongodb"
+	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"

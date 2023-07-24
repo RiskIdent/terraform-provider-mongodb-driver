@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.2rioffice.com/platform/terraform-provider-mongodb-driver/internal/mongodb"
+	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"

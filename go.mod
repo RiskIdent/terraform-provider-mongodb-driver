@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: CC0-1.0
 
-module github.2rioffice.com/platform/terraform-provider-mongodb-driver
+module github.com/RiskIdent/terraform-provider-mongodb-driver
 
 go 1.20
 

@@ -10,7 +10,7 @@ import (
 	"flag"
 	"log"
 
-	"github.2rioffice.com/platform/terraform-provider-mongodb-driver/internal/provider"
+	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
