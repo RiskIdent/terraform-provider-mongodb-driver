@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -48,6 +49,7 @@ type UserResourceModel struct {
 	CustomData map[string]types.String `tfsdk:"custom_data"`
 	Roles      []UserRoleResourceModel `tfsdk:"roles"`
 	Mechanisms []types.String          `tfsdk:"mechanisms"`
+	Timeouts   timeouts.Value          `tfsdk:"timeouts"`
 }
 
 func (u UserResourceModel) userAndDB() (string, string, error) {
@@ -228,6 +230,7 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					),
 				},
 			},
+			"timeouts": timeouts.AttributesAll(ctx),
 		},
 	}
 }
@@ -270,10 +273,17 @@ func (r *UserResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	createTimeout, diags := data.Timeouts.Create(ctx, DefaultTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, createTimeout)
+	defer cancel()
 
 	userName, dbName, err := data.userAndDB()
 	if err != nil {
@@ -308,10 +318,17 @@ func (r *UserResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	readTimeout, diags := data.Timeouts.Read(ctx, DefaultTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
+	defer cancel()
 
 	userName, dbName, err := data.userAndDB()
 	if err != nil {
@@ -336,10 +353,17 @@ func (r *UserResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	updateTimeout, diags := data.Timeouts.Update(ctx, DefaultTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
+	defer cancel()
 
 	userName, dbName, err := data.userAndDB()
 	if err != nil {
@@ -370,10 +394,17 @@ func (r *UserResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	deleteTimeout, diags := data.Timeouts.Delete(ctx, DefaultTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
+	defer cancel()
 
 	userName, dbName, err := data.userAndDB()
 	if err != nil {

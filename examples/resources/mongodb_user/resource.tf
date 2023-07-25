@@ -41,7 +41,21 @@ resource "mongodb_user" "example" {
   pwd  = "super-secret-password"
 
   mechanisms = [
-    "SCRAM-SHA-1",
     "SCRAM-SHA-256",
   ]
+}
+
+// With custom timeouts
+resource "mongodb_user" "example" {
+  user = "my-user"
+  db   = "my-db"
+  pwd  = "super-secret-password"
+
+  // Timeouts default to 30 seconds
+  timeouts = {
+    create = "1m"    // 1 minute
+    read   = "5s"    // 5 seconds
+    update = "1m30s" // 1 minute & 30 seconds
+    delete = "500ms" // 500 milliseconds (or 0.5 seconds)
+  }
 }

@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -30,7 +31,8 @@ type UsersDataSourceModel struct {
 	// MongoDB support more dynamic filters, but due to Terraform Plugin Framework
 	// not supporting dynamic types, we have to settle on a simple map.
 	// See: https://github.com/hashicorp/terraform-plugin-framework/issues/147
-	Filter map[string]string `tfsdk:"filter"`
+	Filter   map[string]string `tfsdk:"filter"`
+	Timeouts timeouts.Value    `tfsdk:"timeouts"`
 }
 
 type UserDataSourceModel struct {
@@ -91,7 +93,7 @@ func (d *UsersDataSource) Metadata(_ context.Context, req datasource.MetadataReq
 	resp.TypeName = req.ProviderTypeName + "_users"
 }
 
-func (d *UsersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *UsersDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `MongoDB user listing data source`,
 
@@ -159,6 +161,7 @@ func (d *UsersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				MarkdownDescription: "Additional filters to apply.",
 				ElementType:         types.StringType,
 			},
+			"timeouts": timeouts.Attributes(ctx),
 		},
 	}
 }
@@ -189,6 +192,14 @@ func (d *UsersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	readTimeout, diags := state.Timeouts.Read(ctx, DefaultTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
+	defer cancel()
 
 	var filter any
 	if state.Filter != nil {

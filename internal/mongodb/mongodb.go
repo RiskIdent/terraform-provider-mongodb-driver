@@ -29,6 +29,8 @@ type Client struct {
 	uri         string
 	credentials Credentials
 	connectOnce sync.Once
+	client      *mongo.Client
+	connectErr  error
 }
 
 type Credentials struct {
@@ -43,10 +45,8 @@ func New(uri string, cred Credentials) *Client {
 	}
 }
 
-func (c *Client) connect(ctx context.Context) (client *mongo.Client, connectErr error) {
+func (c *Client) connect(ctx context.Context) error {
 	c.connectOnce.Do(func() {
-		ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-		defer cancel()
 		opt := options.Client().ApplyURI(c.uri).SetDirect(true)
 		opt.AppName = &AppName
 		if c.credentials.Username != "" {
@@ -57,16 +57,18 @@ func (c *Client) connect(ctx context.Context) (client *mongo.Client, connectErr 
 			})
 		}
 
-		client, connectErr = mongo.Connect(ctx, opt)
+		client, connectErr := mongo.Connect(ctx, opt)
 		if connectErr != nil {
-			connectErr = fmt.Errorf("connect: %w", connectErr)
+			c.connectErr = fmt.Errorf("connect: %w", connectErr)
 			return
 		}
 		if err := client.Ping(ctx, readpref.PrimaryPreferred()); err != nil {
-			connectErr = fmt.Errorf("ping: %w", err)
+			c.connectErr = fmt.Errorf("ping: %w", err)
+			return
 		}
+		c.client = client
 	})
-	return
+	return c.connectErr
 }
 
 type CommandResponse struct {
@@ -192,13 +194,10 @@ func (c *Client) GetDBUser(ctx context.Context, dbName, userName string) (User, 
 }
 
 func (c *Client) listUsers(ctx context.Context, dbName string, query bson.D) ([]User, error) {
-	client, err := c.connect(ctx)
-	if err != nil {
+	if err := c.connect(ctx); err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
-	db := client.Database(dbName)
+	db := c.client.Database(dbName)
 
 	result := db.RunCommand(ctx, query)
 	if err := result.Err(); err != nil {
@@ -237,13 +236,10 @@ func (c *Client) CreateDBUser(ctx context.Context, dbName string, newUser NewUse
 }
 
 func (c *Client) createDBUser(ctx context.Context, dbName string, newUser NewUser) error {
-	client, err := c.connect(ctx)
-	if err != nil {
+	if err := c.connect(ctx); err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
-	db := client.Database(dbName)
+	db := c.client.Database(dbName)
 
 	result := db.RunCommand(ctx, newUser)
 	if err := result.Err(); err != nil {
@@ -279,13 +275,10 @@ func (c *Client) UpdateDBUser(ctx context.Context, dbName string, update UpdateU
 }
 
 func (c *Client) updateDBUser(ctx context.Context, dbName string, update UpdateUser) error {
-	client, err := c.connect(ctx)
-	if err != nil {
+	if err := c.connect(ctx); err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
-	db := client.Database(dbName)
+	db := c.client.Database(dbName)
 
 	result := db.RunCommand(ctx, update)
 	if err := result.Err(); err != nil {
@@ -302,13 +295,10 @@ func (c *Client) updateDBUser(ctx context.Context, dbName string, update UpdateU
 }
 
 func (c *Client) DeleteDBUser(ctx context.Context, dbName, userName string) error {
-	client, err := c.connect(ctx)
-	if err != nil {
+	if err := c.connect(ctx); err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
-	db := client.Database(dbName)
+	db := c.client.Database(dbName)
 
 	result := db.RunCommand(ctx, bson.D{
 		{Key: "dropUser", Value: userName},

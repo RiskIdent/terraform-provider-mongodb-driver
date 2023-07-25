@@ -56,9 +56,23 @@ resource "mongodb_user" "example" {
   pwd  = "super-secret-password"
 
   mechanisms = [
-    "SCRAM-SHA-1",
     "SCRAM-SHA-256",
   ]
+}
+
+// With custom timeouts
+resource "mongodb_user" "example" {
+  user = "my-user"
+  db   = "my-db"
+  pwd  = "super-secret-password"
+
+  // Timeouts default to 30 seconds
+  timeouts = {
+    create = "1m"    // 1 minute
+    read   = "5s"    // 5 seconds
+    update = "1m30s" // 1 minute & 30 seconds
+    delete = "500ms" // 500 milliseconds (or 0.5 seconds)
+  }
 }
 ```
 
@@ -91,6 +105,7 @@ resource "mongodb_user" "example" {
   - The default for featureCompatibilityVersion `4.0` is both `SCRAM-SHA-1` and `SCRAM-SHA-256`.
   - The default for featureCompatibilityVersion `3.6` is `SCRAM-SHA-1`.
 - `roles` (Attributes List) Roles this user belongs to. (see [below for nested schema](#nestedatt--roles))
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
@@ -106,3 +121,14 @@ Required:
 Optional:
 
 - `db` (String) Database this role belongs to. Leave unset to target same database as user.
+
+
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

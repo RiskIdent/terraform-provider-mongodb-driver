@@ -8,6 +8,7 @@ package provider
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -21,6 +22,8 @@ import (
 // Ensure the implementation satisfies the expected interfaces.
 var (
 	_ provider.Provider = &mongodbProvider{}
+
+	DefaultTimeout = 30 * time.Second
 )
 
 // New is a helper function to simplify provider server and testing implementation.
