@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2023 Risk.Ident GmbH <contact@riskident.com>
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-## 0.1.0 (Unreleased)
+## 0.1.0 (2023-07-25)
 
 FEATURES:
 
