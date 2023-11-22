@@ -100,7 +100,7 @@ resource "mongodb_user" "example" {
 ### Optional
 
 - `custom_data` (Map of String) Any custom data for this user. Map of string key and values of arbitrary values.
-- `mechanisms` (List of String) Authentication mechanisms this user can use.
+- `mechanisms` (Set of String) Authentication mechanisms this user can use.
 
   - The default for featureCompatibilityVersion `4.0` is both `SCRAM-SHA-1` and `SCRAM-SHA-256`.
   - The default for featureCompatibilityVersion `3.6` is `SCRAM-SHA-1`.

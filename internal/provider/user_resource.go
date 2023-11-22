@@ -14,7 +14,7 @@ import (
 
 	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -216,16 +216,15 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 					},
 				},
 			},
-			"mechanisms": schema.ListAttribute{
+			"mechanisms": schema.SetAttribute{
 				Optional: true,
 				MarkdownDescription: "Authentication mechanisms this user can use.\n\n" +
 					// Indenting here because the documentation generation doesn't do it
 					"  - The default for featureCompatibilityVersion `4.0` is both `SCRAM-SHA-1` and `SCRAM-SHA-256`.\n" +
 					"  - The default for featureCompatibilityVersion `3.6` is `SCRAM-SHA-1`.",
 				ElementType: types.StringType,
-				Validators: []validator.List{
-					listvalidator.UniqueValues(),
-					listvalidator.ValueStringsAre(
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
 						stringvalidator.OneOf(castToStringSlice(mongodb.Mechanisms)...),
 					),
 				},

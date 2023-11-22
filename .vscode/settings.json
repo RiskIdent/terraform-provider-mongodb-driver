@@ -3,6 +3,7 @@
         "datasource",
         "listvalidator",
         "planmodifier",
+        "setvalidator",
         "stringplanmodifier",
         "stringvalidator",
         "tflog",
