@@ -47,6 +47,9 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_wrapper: false
       - run: go generate ./...
       - name: git diff
         run: |
