@@ -196,7 +196,7 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				MarkdownDescription: "Any custom data for this user. Map of string key and values of arbitrary values.",
 				ElementType:         types.StringType,
 			},
-			"roles": schema.ListNestedAttribute{
+			"roles": schema.SetNestedAttribute{
 				Optional:            true,
 				MarkdownDescription: "Roles this user belongs to.",
 				NestedObject: schema.NestedAttributeObject{

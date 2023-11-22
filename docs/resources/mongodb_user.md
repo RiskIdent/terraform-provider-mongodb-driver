@@ -104,7 +104,7 @@ resource "mongodb_user" "example" {
 
   - The default for featureCompatibilityVersion `4.0` is both `SCRAM-SHA-1` and `SCRAM-SHA-256`.
   - The default for featureCompatibilityVersion `3.6` is `SCRAM-SHA-1`.
-- `roles` (Attributes List) Roles this user belongs to. (see [below for nested schema](#nestedatt--roles))
+- `roles` (Attributes Set) Roles this user belongs to. (see [below for nested schema](#nestedatt--roles))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
