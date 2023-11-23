@@ -30,8 +30,8 @@ To run the tests, run `make test`.
 
 ### Development requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.20
+- [Tofu](https://opentofu.org/docs/intro/install) >= 1.6.0-alpha1
+- [Go](https://golang.org/doc/install) >= 1.21
 
 ### Building The Provider
 

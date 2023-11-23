@@ -252,7 +252,20 @@ func (c *Client) CreateDBUser(ctx context.Context, dbName string, newUser NewUse
 func (c *Client) runCreateUser(ctx context.Context, dbName string, newUser NewUser) error {
 	db := c.client.Database(dbName)
 
-	result := db.RunCommand(ctx, newUser)
+	// Empty list is never a valid value, and the MongoDB BSON encoder doesn't
+	// seem to fully treat empty slices as empty, even though the docs say it should.
+	if len(newUser.Mechanisms) == 0 {
+		newUser.Mechanisms = nil
+	}
+
+	var cmd = struct {
+		NewUser        `bson:",inline"`
+		DigestPassword bool `bson:"digestPassword"`
+	}{
+		NewUser:        newUser,
+		DigestPassword: true,
+	}
+	result := db.RunCommand(ctx, cmd)
 	if err := result.Err(); err != nil {
 		return err
 	}

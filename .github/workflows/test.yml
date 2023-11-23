@@ -13,6 +13,8 @@ on:
     paths-ignore:
       - 'README.md'
   push:
+    branches:
+      - main
     paths-ignore:
       - 'README.md'
 
@@ -47,6 +49,9 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_wrapper: false
       - run: go generate ./...
       - name: git diff
         run: |
@@ -63,22 +68,18 @@ jobs:
       fail-fast: false
       matrix:
         # list whatever Terraform versions here you would like to support
-        terraform:
-          - '1.0.*'
-          - '1.1.*'
-          - '1.2.*'
-          - '1.3.*'
-          - '1.4.*'
+        tofu:
+          - '1.6.0-alpha5'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version-file: 'go.mod'
           cache: true
-      - uses: hashicorp/setup-terraform@v3
+      - uses: opentofu/setup-opentofu@v1
         with:
-          terraform_version: ${{ matrix.terraform }}
-          terraform_wrapper: false
+          tofu_version: ${{ matrix.tofu }}
+          tofu_wrapper: false
       - run: go mod download
       - env:
           TF_ACC: "1"
