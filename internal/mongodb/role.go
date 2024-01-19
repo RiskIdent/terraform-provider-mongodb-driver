@@ -92,7 +92,7 @@ func (c *Client) runRolesInfo(ctx context.Context, dbName string, query rolesInf
 type NewRole struct {
 	Role       string      `bson:"createRole"`
 	Privileges []Privilege `bson:"privileges"`
-	Roles      []RoleDBRef `bson:"roles"`
+	Roles      []RoleRef   `bson:"roles"`
 }
 
 func (c *Client) CreateDBRole(ctx context.Context, dbName string, newRole NewRole) (Role, error) {
@@ -103,7 +103,7 @@ func (c *Client) CreateDBRole(ctx context.Context, dbName string, newRole NewRol
 		newRole.Privileges = []Privilege{}
 	}
 	if newRole.Roles == nil {
-		newRole.Roles = []RoleDBRef{}
+		newRole.Roles = []RoleRef{}
 	}
 	if err := c.runCreateRole(ctx, dbName, newRole); err != nil {
 		return Role{}, err

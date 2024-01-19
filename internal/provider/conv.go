@@ -39,3 +39,11 @@ func fromTypesStringMap(m map[string]types.String) map[string]string {
 	}
 	return result
 }
+
+func castToStringSlice[E ~string](slice []E) []string {
+	result := make([]string, len(slice))
+	for i, s := range slice {
+		result[i] = string(s)
+	}
+	return result
+}
