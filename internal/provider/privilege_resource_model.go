@@ -6,21 +6,32 @@ package provider
 
 import (
 	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var privilegeResourceNestedSchema = schema.NestedAttributeObject{
 	Attributes: map[string]schema.Attribute{
 		"resource": schema.SingleNestedAttribute{
-			Required:            true,
-			MarkdownDescription: "A document that specifies the resources upon which the privilege `actions` apply.",
-			Attributes:          resourceResourceAttributesSchema,
+			Required: true,
+			MarkdownDescription: "A document that specifies the resources upon which the privilege `actions` apply.\n" +
+				"\n" +
+				"  Can only supply one of the following attribute combinations:" +
+				"  - only `cluster` attribute, must be set to `true`" +
+				"  - only `any_resource` attribute, must be set to `true`" +
+				"  - only `db` and `collection` attributes",
+			Attributes: resourceResourceAttributesSchema,
 		},
 		"actions": schema.SetAttribute{
-			Optional:            true,
-			MarkdownDescription: "Database this role belongs to. Leave unset to target same database as role.",
-			ElementType:         types.StringType,
+			Required: true,
+			MarkdownDescription: "Database this role belongs to. Leave unset to target same database as role.\n" +
+				"  See: <https://www.mongodb.com/docs/manual/reference/privilege-actions/>",
+			ElementType: types.StringType,
+			Validators: []validator.Set{
+				setvalidator.SizeAtLeast(1),
+			},
 		},
 	},
 }

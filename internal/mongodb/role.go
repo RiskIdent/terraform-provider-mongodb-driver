@@ -102,6 +102,11 @@ func (c *Client) CreateDBRole(ctx context.Context, dbName string, newRole NewRol
 	if newRole.Privileges == nil {
 		newRole.Privileges = []Privilege{}
 	}
+	for i := range newRole.Privileges {
+		if newRole.Privileges[i].Actions == nil {
+			newRole.Privileges[i].Actions = []string{}
+		}
+	}
 	if newRole.Roles == nil {
 		newRole.Roles = []RoleRef{}
 	}
@@ -140,6 +145,11 @@ type UpdateRole struct {
 func (c *Client) UpdateDBRole(ctx context.Context, dbName string, update UpdateRole) (Role, error) {
 	if err := c.connect(ctx); err != nil {
 		return Role{}, err
+	}
+	for i := range update.Privileges {
+		if update.Privileges[i].Actions == nil {
+			update.Privileges[i].Actions = []string{}
+		}
 	}
 	if err := c.runUpdateRole(ctx, dbName, update); err != nil {
 		return Role{}, err

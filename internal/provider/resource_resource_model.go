@@ -8,7 +8,11 @@ import (
 	"fmt"
 
 	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -16,12 +20,20 @@ var resourceResourceAttributesSchema = map[string]schema.Attribute{
 	"cluster": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Set to true to target the MongoDB cluster as the resource.",
+		Validators: []validator.Bool{
+			boolvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("db")),
+			boolvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("collection")),
+		},
 	},
 	"any_resource": schema.BoolAttribute{
 		Optional: true,
 		MarkdownDescription: "Set to true to target every resource in the system. " +
 			"Intended for internal use. **Do not** use this resource, " +
 			"other than in exceptional circumstances.",
+		Validators: []validator.Bool{
+			boolvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("db")),
+			boolvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("collection")),
+		},
 	},
 	"db": schema.StringAttribute{
 		Optional: true,
@@ -32,11 +44,16 @@ var resourceResourceAttributesSchema = map[string]schema.Attribute{
 			"the resource is all collections with the specified `collection` name across all databases." +
 			"If only the `collection` attribute is an empty string (`\"\"`), " +
 			"the resource is the specified database, excluding the system collections.",
-		Validators: optionalDatabaseValidators,
+		Validators: append(optionalDatabaseValidators, []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("collection")),
+		}...),
 	},
 	"collection": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Specify which collection to target. Must be paired with the `db` attribute.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("db")),
+		},
 	},
 }
 
