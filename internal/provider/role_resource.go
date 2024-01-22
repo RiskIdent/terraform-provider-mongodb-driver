@@ -221,7 +221,10 @@ func (r *RoleResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	data.applyRole(role)
+	if err := data.applyRole(role); err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to interpret database response, got error: %s", err))
+		return
+	}
 
 	// Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log
@@ -260,7 +263,10 @@ func (r *RoleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	data.applyRole(role)
+	if err := data.applyRole(role); err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to interpret database response, got error: %s", err))
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -299,7 +305,10 @@ func (r *RoleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	data.applyRole(role)
+	if err := data.applyRole(role); err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to interpret database response, got error: %s", err))
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
