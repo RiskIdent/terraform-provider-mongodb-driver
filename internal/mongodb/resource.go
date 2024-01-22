@@ -15,7 +15,7 @@ type ResourceWrapper struct {
 	Union Resource
 }
 
-// Ensure it implements the interfaces
+// Ensure it implements the interfaces.
 var _ bson.ValueMarshaler = &ResourceWrapper{}
 var _ bson.ValueUnmarshaler = &ResourceWrapper{}
 

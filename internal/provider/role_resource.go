@@ -40,12 +40,12 @@ type RoleResource struct {
 
 // RoleResourceModel describes the resource data model.
 type RoleResourceModel struct {
-	ID    types.String           `tfsdk:"id"`
-	Role  types.String           `tfsdk:"role"`
-	DB    types.String           `tfsdk:"db"`
-	Roles []RoleRefResourceModel `tfsdk:"roles"`
-	//Privileges []RolePrivilegeResourceModel `tfsdk:"privileges"`
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
+	ID         types.String             `tfsdk:"id"`
+	Role       types.String             `tfsdk:"role"`
+	DB         types.String             `tfsdk:"db"`
+	Roles      []RoleRefResourceModel   `tfsdk:"roles"`
+	Privileges []PrivilegeResourceModel `tfsdk:"privileges"`
+	Timeouts   timeouts.Value           `tfsdk:"timeouts"`
 }
 
 func (u RoleResourceModel) roleAndDB() (string, string, error) {
@@ -72,13 +72,21 @@ func (u RoleResourceModel) roleAndDB() (string, string, error) {
 	return role, db, nil
 }
 
-func (u *RoleResourceModel) applyRole(role mongodb.Role) {
+func (u *RoleResourceModel) applyRole(role mongodb.Role) error {
 	u.ID = types.StringValue(role.ID)
 	u.Role = types.StringValue(role.Role)
 	u.DB = types.StringValue(role.DB)
 	if u.Roles != nil {
 		u.Roles = toTypesRoleRefResourceSlice(u.Roles, role.Roles)
 	}
+	if u.Privileges != nil {
+		privs, err := toTypesPrivilegeResourceSlice(role.Privileges)
+		if err != nil {
+			return err
+		}
+		u.Privileges = privs
+	}
+	return nil
 }
 
 func (r *RoleResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -154,46 +162,7 @@ func (r *RoleResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"privileges": schema.SetNestedAttribute{
 				Optional:            true,
 				MarkdownDescription: "Privileges this role has.",
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"resource": schema.SingleNestedAttribute{
-							Required:            true,
-							MarkdownDescription: "A document that specifies the resources upon which the privilege `actions` apply.",
-							Attributes: map[string]schema.Attribute{
-								"cluster": schema.BoolAttribute{
-									Optional:            true,
-									MarkdownDescription: "Set to true to target the MongoDB cluster as the resource.",
-								},
-								"anyResource": schema.BoolAttribute{
-									Optional: true,
-									MarkdownDescription: "Set to true to target every resource in the system. " +
-										"Intended for internal use. **Do not** use this resource, " +
-										"other than in exceptional circumstances.",
-								},
-								"db": schema.StringAttribute{
-									Optional: true,
-									MarkdownDescription: "Specify which database to target. Must be paired with the `collection` attribute. " +
-										"If both the `db` and `collections` are empty strings (`\"\"`), " +
-										"the resource is all collections, excluding the system collections, in all the databases. " +
-										"If only the `db` attribute is an empty string (`\"\"`), " +
-										"the resource is all collections with the specified `collection` name across all databases." +
-										"If only the `collection` attribute is an empty string (`\"\"`), " +
-										"the resource is the specified database, excluding the system collections.",
-									Validators: optionalDatabaseValidators,
-								},
-								"collection": schema.StringAttribute{
-									Optional:            true,
-									MarkdownDescription: "Specify which collection to target. Must be paired with the `db` attribute.",
-								},
-							},
-						},
-						"actions": schema.StringAttribute{
-							Optional:            true,
-							MarkdownDescription: "Database this role belongs to. Leave unset to target same database as role.",
-							Validators:          databaseValidators,
-						},
-					},
-				},
+				NestedObject:        privilegeResourceNestedSchema,
 			},
 			"timeouts": timeouts.AttributesAll(ctx),
 		},
@@ -243,9 +212,9 @@ func (r *RoleResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	role, err := r.client.CreateDBRole(ctx, dbName, mongodb.NewRole{
-		Role:  roleName,
-		Roles: fromTypesRoleRefResourceSlice(data.Roles),
-		// TODO: privileges
+		Role:       roleName,
+		Roles:      fromTypesRoleRefResourceSlice(data.Roles),
+		Privileges: fromTypesPrivilegeResourceSlice(data.Privileges),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create role, got error: %s", err))
@@ -321,9 +290,9 @@ func (r *RoleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	role, err := r.client.UpdateDBRole(ctx, dbName, mongodb.UpdateRole{
-		Role:  roleName,
-		Roles: fromTypesRoleRefResourceSlice(data.Roles),
-		// TODO: privileges
+		Role:       roleName,
+		Roles:      fromTypesRoleRefResourceSlice(data.Roles),
+		Privileges: fromTypesPrivilegeResourceSlice(data.Privileges),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update role, got error: %s", err))
