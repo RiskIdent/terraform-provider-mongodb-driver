@@ -6,6 +6,7 @@ package provider
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 
@@ -14,16 +15,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
 
-const (
-  mongodbUri = "mongodb://localhost:27017"
+var (
+	mongodbUri     = getMongoURI()
 	providerConfig = `
 provider "mongodb" {
-  uri = "`+mongodbUri+`"
+  uri = "` + mongodbUri + `"
 }
 `
-)
 
-var (
 	// testAccProtoV6ProviderFactories are used to instantiate a provider during
 	// acceptance testing. The factory function will be invoked for every Terraform
 	// CLI command executed to create a provider server to which the CLI can
@@ -32,6 +31,13 @@ var (
 		"mongodb": providerserver.NewProtocol6WithError(New("test")()),
 	}
 )
+
+func getMongoURI() string {
+	if uri := os.Getenv("MONGODB_URI"); uri != "" {
+		return uri
+	}
+	return "mongodb://localhost:27017"
+}
 
 func createTestUser(t *testing.T, dbName, userName string) {
 	db := mongodb.New(mongodbUri, mongodb.Credentials{})

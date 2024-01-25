@@ -71,6 +71,9 @@ Then run the Go tests with the `TF_ACC=1` environment variable set:
 TF_ACC=1 go test -count=1 ./...
 ```
 
+The MongoDB URI that the tests try to access can be overridden with
+the `MONGODB_URI` environment variable.
+
 ## License
 
 This repository complies with the [REUSE recommendations](https://reuse.software/).
