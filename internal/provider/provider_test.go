@@ -51,6 +51,8 @@ func createTestUser(t *testing.T, dbName, userName string) {
 		t.Fatalf("create test user: %s", err)
 	}
 	t.Cleanup(func() {
-		db.DeleteDBUser(context.Background(), "testdb", "test-user")
+		if db.DeleteDBUser(context.Background(), dbName, userName) != nil {
+			t.Errorf("Failed to clean up temporary testing user: %s.%s", dbName, userName)
+		}
 	})
 }
