@@ -88,6 +88,5 @@ jobs:
       - run: go mod download
       - env:
           TF_ACC: "1"
-          MONGODB_URI: mongodb://mongodb:27017/
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10
