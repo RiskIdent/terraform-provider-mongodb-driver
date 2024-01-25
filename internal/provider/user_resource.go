@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/RiskIdent/terraform-provider-mongodb-driver/internal/mongodb"
@@ -47,7 +46,7 @@ type UserResourceModel struct {
 	DB         types.String            `tfsdk:"db"`
 	Password   types.String            `tfsdk:"pwd"`
 	CustomData map[string]types.String `tfsdk:"custom_data"`
-	Roles      []UserRoleResourceModel `tfsdk:"roles"`
+	Roles      []RoleRefResourceModel  `tfsdk:"roles"`
 	Mechanisms []types.String          `tfsdk:"mechanisms"`
 	Timeouts   timeouts.Value          `tfsdk:"timeouts"`
 }
@@ -84,53 +83,11 @@ func (u *UserResourceModel) applyUser(user mongodb.User) {
 		u.CustomData = toTypesStringMap(user.CustomData)
 	}
 	if u.Roles != nil {
-		u.Roles = toTypesUserRoleResourceSlice(u.Roles, user.Roles)
+		u.Roles = toTypesRoleRefResourceSlice(u.Roles, user.Roles)
 	}
 	if u.Mechanisms != nil {
 		u.Mechanisms = toTypesStringSlice(user.Mechanisms)
 	}
-}
-
-type UserRoleResourceModel struct {
-	Role types.String `tfsdk:"role"`
-	DB   types.String `tfsdk:"db"`
-}
-
-func (r UserRoleResourceModel) toRoleRef() mongodb.RoleRef {
-	if r.DB.IsNull() {
-		return mongodb.RoleSameDBRef(r.Role.ValueString())
-	}
-	return mongodb.RoleDBRef{
-		Role: r.Role.ValueString(),
-		DB:   r.DB.ValueString(),
-	}
-}
-
-func fromTypesUserRoleResourceSlice(roles []UserRoleResourceModel) []mongodb.RoleRef {
-	result := make([]mongodb.RoleRef, len(roles))
-	for i, role := range roles {
-		result[i] = role.toRoleRef()
-	}
-	return result
-}
-
-func toTypesUserRoleResourceSlice(oldRoles []UserRoleResourceModel, roles []mongodb.RoleDBRef) []UserRoleResourceModel {
-	result := make([]UserRoleResourceModel, len(roles))
-	for i, role := range roles {
-		result[i] = toTypesUserRoleResource(oldRoles[i], role)
-	}
-	return result
-}
-
-func toTypesUserRoleResource(oldRole UserRoleResourceModel, role mongodb.RoleDBRef) UserRoleResourceModel {
-	newRole := UserRoleResourceModel{
-		Role: types.StringValue(role.Role),
-		DB:   types.StringValue(role.DB),
-	}
-	if oldRole.DB.IsNull() {
-		newRole.DB = types.StringNull()
-	}
-	return newRole
 }
 
 func (r *UserResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -234,20 +191,6 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 	}
 }
 
-var databaseValidators = []validator.String{
-	stringvalidator.LengthBetween(1, 64),
-	stringvalidator.RegexMatches(regexp.MustCompile(`^[^\/\\. "$*<>:|?\0]*$`),
-		`MongoDB has restrictions on database name. We're limiting on the Windows restrictions here to be safe. See https://www.mongodb.com/docs/v6.0/reference/limits/#naming-restrictions`),
-}
-
-func castToStringSlice[E ~string](slice []E) []string {
-	result := make([]string, len(slice))
-	for i, s := range slice {
-		result[i] = string(s)
-	}
-	return result
-}
-
 func (r *UserResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
@@ -294,7 +237,7 @@ func (r *UserResource) Create(ctx context.Context, req resource.CreateRequest, r
 		User:       userName,
 		Password:   data.Password.ValueString(),
 		CustomData: fromTypesStringMap(data.CustomData),
-		Roles:      fromTypesUserRoleResourceSlice(data.Roles),
+		Roles:      fromTypesRoleRefResourceSlice(data.Roles),
 		Mechanisms: fromTypesStringSlice[mongodb.Mechanism](data.Mechanisms),
 	})
 	if err != nil {
@@ -374,7 +317,7 @@ func (r *UserResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		User:       userName,
 		Password:   data.Password.ValueString(),
 		CustomData: fromTypesStringMap(data.CustomData),
-		Roles:      fromTypesUserRoleResourceSlice(data.Roles),
+		Roles:      fromTypesRoleRefResourceSlice(data.Roles),
 		Mechanisms: fromTypesStringSlice[mongodb.Mechanism](data.Mechanisms),
 	})
 	if err != nil {

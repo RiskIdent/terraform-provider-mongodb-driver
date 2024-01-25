@@ -39,9 +39,40 @@ To run the tests, run `make test`.
 2. Enter the repository directory
 3. Build the provider using the Go `install` command:
 
+   ```shell
+   go install
+   ```
+
+4. Tell Terraform via `~/.terraformrc` to use the locally built version of the
+   provider: (must use absolute path, Terraform does not understand `~/go/bin`)
+
+   ```terraform
+   // File: ~/.terraformrc
+   provider_installation {
+     dev_overrides {
+       "registry.terraform.io/RiskIdent/mongodb-driver" = "/home/<your username>/go/bin"
+       "registry.opentofu.org/RiskIdent/mongodb-driver" = "/home/<your username>/go/bin"
+     }
+     direct {}
+   }
+   ```
+
+### Testing
+
+First start MongoDB locally, such as via Podman:
+
 ```shell
-go install
+podman run -d --rm -p 27017:27017 --name mongo mongo
 ```
+
+Then run the Go tests with the `TF_ACC=1` environment variable set:
+
+```shell
+TF_ACC=1 go test -count=1 ./...
+```
+
+The MongoDB URI that the tests try to access can be overridden with
+the `MONGODB_URI` environment variable.
 
 ## License
 

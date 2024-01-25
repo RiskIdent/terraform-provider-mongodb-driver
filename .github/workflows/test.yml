@@ -69,7 +69,12 @@ jobs:
       matrix:
         # list whatever Terraform versions here you would like to support
         tofu:
-          - '1.6.0-alpha5'
+          - '1.6.0'
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - "27017:27017"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
