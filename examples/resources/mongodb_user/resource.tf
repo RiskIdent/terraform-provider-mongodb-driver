@@ -29,7 +29,7 @@ resource "mongodb_user" "example" {
   db   = "my-db"
   pwd  = "super-secret-password"
 
-  customData = {
+  custom_data = {
     "my-custom-field" = "my-custom-value"
   }
 }

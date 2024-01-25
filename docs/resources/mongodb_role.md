@@ -34,7 +34,9 @@ resource "mongodb_role" "example" {
       actions  = ["find"]
     }
   ]
-  roles = { role = "read", db = "admin" }
+  roles = [
+    { role = "read", db = "admin" },
+  ]
 }
 ```
 

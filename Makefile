@@ -10,6 +10,11 @@ generate:
 test:
 	go test ./...
 
+# Run acceptance tests
+.PHONY: testacc
+testacc:
+	TF_ACC=1 go test -count=1 ./...
+
 .PHONY: deps
 deps: deps-npm deps-pip
 

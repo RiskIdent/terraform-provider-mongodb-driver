@@ -122,6 +122,9 @@ func (c *Client) runCreateUser(ctx context.Context, dbName string, newUser NewUs
 	if len(newUser.Mechanisms) == 0 {
 		newUser.Mechanisms = nil
 	}
+	if newUser.Roles == nil {
+		newUser.Roles = []RoleRef{}
+	}
 
 	var cmd = struct {
 		NewUser        `bson:",inline"`

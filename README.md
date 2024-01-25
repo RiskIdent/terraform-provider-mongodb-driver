@@ -57,6 +57,20 @@ To run the tests, run `make test`.
    }
    ```
 
+### Testing
+
+First start MongoDB locally, such as via Podman:
+
+```shell
+podman run -d --rm -p 27017:27017 --name mongo mongo
+```
+
+Then run the Go tests with the `TF_ACC=1` environment variable set:
+
+```shell
+TF_ACC=1 go test -count=1 ./...
+```
+
 ## License
 
 This repository complies with the [REUSE recommendations](https://reuse.software/).
