@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccUsersDataSource(t *testing.T) {
-  createTestUser(t, "testdb", "test-user")
+	createTestUser(t, "testdb", "test-user")
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
