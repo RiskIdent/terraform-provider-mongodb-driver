@@ -4,8 +4,7 @@
 
 module github.com/RiskIdent/terraform-provider-mongodb-driver
 
-go 1.21.4
-toolchain go1.22.5
+go 1.23.1
 
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
