@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+version: "2"
+
 # Visit https://golangci-lint.run/ for usage documentation
 # and information on other useful linters
 issues:
@@ -10,22 +12,8 @@ issues:
   max-same-issues: 0
 
 linters:
-  disable-all: true
+  default: standard
+
+formatters:
   enable:
-    - durationcheck
-    - errcheck
-    - forcetypeassert
-    - godot
     - gofmt
-    - gosimple
-    - ineffassign
-    - makezero
-    - misspell
-    - nilerr
-    - predeclared
-    - staticcheck
-    - usetesting
-    - unconvert
-    - unparam
-    - unused
-    - govet
