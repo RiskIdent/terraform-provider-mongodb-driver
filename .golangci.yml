@@ -12,22 +12,8 @@ issues:
   max-same-issues: 0
 
 linters:
-  default: none
+  default: standard
+
+formatters:
   enable:
-    - durationcheck
-    - errcheck
-    - forcetypeassert
-    - godot
     - gofmt
-    - gosimple
-    - ineffassign
-    - makezero
-    - misspell
-    - nilerr
-    - predeclared
-    - staticcheck
-    - usetesting
-    - unconvert
-    - unparam
-    - unused
-    - govet
