@@ -4,10 +4,10 @@
 
 module github.com/RiskIdent/terraform-provider-mongodb-driver
 
-go 1.23.1
+go 1.23.7
 
 require (
-	github.com/hashicorp/terraform-plugin-docs v0.21.0
+	github.com/hashicorp/terraform-plugin-docs v0.22.0
 	github.com/hashicorp/terraform-plugin-framework v1.15.1
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.5.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
