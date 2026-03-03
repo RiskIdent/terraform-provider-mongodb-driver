@@ -8,13 +8,21 @@ jobs:
   remark-lint:
     name: runner / remark-lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
       - name: install remark presets
         run: npm install
         shell: bash
+
       - name: remark-lint
-        uses: reviewdog/action-remark-lint@v5
+        uses: reviewdog/action-remark-lint@82225f7db5b4a3caaca3052733b6800fa7d109b0 # v5.18.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-check
