@@ -8,6 +8,9 @@ SPDX-License-Identifier: CC-BY-4.0
 
 [![REUSE status](https://api.reuse.software/badge/github.com/RiskIdent/terraform-provider-mongodb-driver)](https://api.reuse.software/info/github.com/RiskIdent/terraform-provider-mongodb-driver)
 
+> [!WARNING]
+> This project is unmaintained
+
 Manage MongoDB itself using MongoDB driver.
 
 ## Using the provider
